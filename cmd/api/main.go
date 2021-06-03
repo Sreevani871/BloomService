@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	"github.com/go-kit/kit/log"
-	bloomservice "github.com/richagaur07/BloomService"
+	bloomservice "github.com/richagaur07/BloomService/internal/api"
 )
 
 func main() {

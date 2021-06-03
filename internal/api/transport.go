@@ -21,39 +21,32 @@ var (
 
 func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 	r := mux.NewRouter()
-	r.Use(commonMiddleware)
 	e := MakeServerEndpoints(s)
+	apiRouter := r.PathPrefix("/api/v1").Subrouter()
 	options := []httptransport.ServerOption{
 		httptransport.ServerErrorHandler(transport.NewLogErrorHandler(logger)),
 		httptransport.ServerErrorEncoder(encodeError),
 	}
 
-	r.Methods(http.MethodPost).Path("/api/v1/sherlock/routes").Handler(httptransport.NewServer(
+	apiRouter.Methods(http.MethodPost).PathPrefix("/sherlock/routes").Handler(httptransport.NewServer(
 		e.PostEndpoint,
 		decodePostRequest,
 		encodeResponse,
 		options...,
 	))
-	r.Methods(http.MethodGet).Path("/api/v1/sherlock/routes").Handler(httptransport.NewServer(
+	apiRouter.Methods(http.MethodGet).PathPrefix("/sherlock/routes").Handler(httptransport.NewServer(
 		e.GetEndpoint,
 		decodeGetRequest,
 		encodeResponse,
 		options...,
 	))
-	r.Methods(http.MethodDelete).Path("/api/v1/sherlock/routes/{id}").Handler(httptransport.NewServer(
+	apiRouter.Methods(http.MethodDelete).PathPrefix("/sherlock/routes/{id}").Handler(httptransport.NewServer(
 		e.DeleteEndpoint,
 		decodeDeleteRequest,
 		encodeResponse,
 		options...,
 	))
 	return r
-}
-
-func commonMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "application/json")
-		next.ServeHTTP(w, r)
-	})
 }
 
 func decodePostRequest(_ context.Context, r *http.Request) (request interface{}, err error) {

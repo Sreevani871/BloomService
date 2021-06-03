@@ -11,7 +11,7 @@ import (
 
 type Service interface {
 	PostTraceIdToIndex(ctx context.Context, t TraceID, i Index) (string, error)
-	GetIndex(ctx context.Context, t TraceID) (*[]Index, error)
+	GetIndex(ctx context.Context, t TraceID) ([]Index, error)
 	DeleteIndex(ctx context.Context, i Index) (string, error)
 }
 
@@ -28,29 +28,29 @@ var (
 	ErrNotFound            = errors.New("Not found")
 )
 
-type inmemService struct {
+type InmemService struct {
 	logger log.Logger
 	m      map[Index]bloom.BloomFilter
 }
 
 func NewInmemService(logger log.Logger) Service {
-	return &inmemService{
+	return &InmemService{
 		logger: logger,
 		m:      map[Index]bloom.BloomFilter{},
 	}
 }
 
-func (s *inmemService) PostTraceIdToIndex(ctx context.Context, t TraceID, i Index) (string, error) {
-	logger := log.With(s.logger, "method", "PostTraceIdToIndex")
+func (s *InmemService) PostTraceIdToIndex(ctx context.Context, t TraceID, i Index) (string, error) {
+	// logger := log.With(s.logger, "method", "PostTraceIdToIndex")
 
-	logger.Log("traceId", t)
-	logger.Log("index", i)
+	// logger.Log("traceId", t)
+	// logger.Log("index", i)
 
 	if len(t) == 0 {
 		return "", ErrInconsistentTraceId
 	}
 
-	if len(t) == 0 {
+	if len(i) == 0 {
 		return "", ErrInconsistentIndex
 	}
 
@@ -68,17 +68,17 @@ func (s *inmemService) PostTraceIdToIndex(ctx context.Context, t TraceID, i Inde
 	return "Success", nil
 }
 
-func (s *inmemService) GetIndex(ctx context.Context, t TraceID) (*[]Index, error) {
+func (s *InmemService) GetIndex(ctx context.Context, t TraceID) ([]Index, error) {
 	var indices []Index
 	for idx, filter := range s.m {
 		if filter.Test([]byte(t)) {
 			indices = append(indices, idx)
 		}
 	}
-	return &indices, nil
+	return indices, nil
 }
 
-func (s *inmemService) DeleteIndex(ctx context.Context, i Index) (string, error) {
+func (s *InmemService) DeleteIndex(ctx context.Context, i Index) (string, error) {
 	_, ok := s.m[i]
 	if !ok {
 		return "", ErrNotFound

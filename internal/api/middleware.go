@@ -31,7 +31,7 @@ func (mw loggingMiddleware) PostTraceIdToIndex(ctx context.Context, t TraceID, i
 	return mw.next.PostTraceIdToIndex(ctx, t, i)
 }
 
-func (mw loggingMiddleware) GetIndex(ctx context.Context, t TraceID) (l *[]Index, err error) {
+func (mw loggingMiddleware) GetIndex(ctx context.Context, t TraceID) (l []Index, err error) {
 	defer func(begin time.Time) {
 		mw.logger.Log("method", "GetIndex", "tarceId", t, "took", time.Since(begin), "err", err)
 	}(time.Now())

@@ -38,7 +38,7 @@ func MakeGetEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(getRequest)
 		p, e := s.GetIndex(ctx, TraceID(req.Id))
-		return getResponse{Indices: p, Err: e}, nil
+		return getResponse{Indices: &p, Err: e}, nil
 	}
 }
 
@@ -51,11 +51,6 @@ func MakeDeleteEndpoint(s Service) endpoint.Endpoint {
 		return deleteResponse{Msg: msg}, e
 	}
 }
-
-// type PostDataModel struct {
-// 	TraceId string `json:"traceId"`
-// 	Index   string `json:"index"`
-// }
 
 type postRequest struct {
 	TraceId string `json:"traceId"`
